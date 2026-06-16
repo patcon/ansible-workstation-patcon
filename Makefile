@@ -1,5 +1,8 @@
 # These are just a set of helpers for common tasks and usage demonstrations.
 
+prereq_check: ## Check local SSH config prereqs before running converge
+	python3 scripts/prereq_check.py
+
 install_roles: ## Install external roles from Ansible Galaxy
 	ansible-galaxy install --role-file roles_external.yml
 
