@@ -6,6 +6,9 @@ install_roles: ## Install external roles from Ansible Galaxy
 converge: install_roles ## Converge the workstation over SSH
 	ansible-playbook playbooks/workstation.yml
 
+bootstrap: install_roles ## Create the sudo user and authorize SSH keys, before hardening locks out root
+	ansible-playbook playbooks/workstation.yml --tags bootstrap
+
 converge_local: install_roles ## Converge the workstation locally
 	ansible-playbook playbooks/workstation.yml --connection=local
 

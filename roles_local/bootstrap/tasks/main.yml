@@ -1,0 +1,29 @@
+---
+# Why: ssh-hardening disables root SSH login, so this user must exist
+# with sudo + key access before the hardening roles run.
+- name: Ensure sudo group exists
+  group:
+    name: sudo
+    state: present
+
+- name: Create non-root sudo user
+  user:
+    name: "{{ bootstrap_user }}"
+    groups: sudo
+    append: true
+    shell: /bin/bash
+    state: present
+
+- name: Allow passwordless sudo for the group
+  copy:
+    dest: /etc/sudoers.d/sudo-nopasswd
+    content: "%sudo ALL=(ALL) NOPASSWD:ALL\n"
+    mode: '0440'
+    validate: visudo -cf %s
+
+- name: Authorize SSH keys for the new user
+  authorized_key:
+    user: "{{ bootstrap_user }}"
+    key: "{{ item }}"
+    state: present
+  loop: "{{ bootstrap_user_ssh_keys }}"

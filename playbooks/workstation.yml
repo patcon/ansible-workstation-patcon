@@ -1,3 +1,9 @@
 ---
 - hosts: workstation
-  roles: []
+  roles:
+    - role: bootstrap
+      tags: bootstrap
+    - role: dev-sec.os-hardening
+      tags: hardening
+    - role: dev-sec.ssh-hardening
+      tags: hardening
