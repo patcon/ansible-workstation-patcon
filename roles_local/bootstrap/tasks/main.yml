@@ -21,6 +21,12 @@
     mode: '0440'
     validate: visudo -cf %s
 
+- name: Install Ansible
+  apt:
+    name: ansible
+    state: present
+    update_cache: false
+
 - name: Authorize SSH keys for the new user
   authorized_key:
     user: "{{ bootstrap_user }}"

@@ -1,5 +1,27 @@
 ---
 - hosts: workstation
+  vars:
+    # dev-sec.os-hardening 6.2.0 defines this as null; ansible-core 2.20 rejects
+    # NoneType in conditionals, so we override it to an empty dict.
+    sysctl_overwrite: {}
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+      become: true
+
+    # Ubuntu 26.04 ships without /etc/sysctl.conf; dev-sec.os-hardening requires it
+    - name: Ensure /etc/sysctl.conf exists
+      file:
+        path: /etc/sysctl.conf
+        state: touch
+        owner: root
+        group: root
+        mode: '0440'
+        modification_time: preserve
+        access_time: preserve
+      become: true
   roles:
     - role: bootstrap
       tags: bootstrap
