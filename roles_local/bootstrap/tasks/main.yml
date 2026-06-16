@@ -21,9 +21,11 @@
     mode: '0440'
     validate: visudo -cf %s
 
-- name: Install Ansible
+- name: Install bootstrap packages
   apt:
-    name: ansible
+    name:
+      - ansible
+      - make
     state: present
     update_cache: false
 
