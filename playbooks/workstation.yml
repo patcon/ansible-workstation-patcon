@@ -1,5 +1,6 @@
 ---
 - hosts: workstation
+  become: true
   vars:
     # dev-sec.os-hardening 6.2.0 defines this as null; ansible-core 2.20 rejects
     # NoneType in conditionals, so we override it to an empty dict.
