@@ -26,3 +26,5 @@
       tags: hardening
     - role: dev-sec.ssh-hardening
       tags: hardening
+    - role: personalization
+      tags: personalization
