@@ -15,7 +15,7 @@ def patch_ssh_hardening_template():
     # template headers; the role ships with quoted strings ("true"/"false").
     p = REPO_ROOT / 'roles_external/dev-sec.ssh-hardening/templates/opensshd.conf.j2'
     original = p.read_text()
-    patched = re.sub(r'"(true|false)"', lambda m: m.group(1), original)
+    patched = re.sub(r'"(true|false)"', lambda m: m.group(1).capitalize(), original)
     if patched != original:
         p.write_text(patched)
         print(f'Patched: {p.relative_to(REPO_ROOT)}')
