@@ -5,6 +5,7 @@ prereq_check: ## Check local SSH config prereqs before running converge
 
 install_roles: ## Install external roles from Ansible Galaxy
 	ansible-galaxy install --role-file roles_external.yml
+	python3 scripts/external_roles_monkeypatch.py
 
 converge: install_roles ## Converge the workstation over SSH
 	ansible-playbook playbooks/workstation.yml
