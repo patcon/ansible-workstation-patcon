@@ -1,0 +1,6 @@
+---
+# Why: Hardens general OS-level settings
+- src: dev-sec.os-hardening
+
+# Why: Hardens sshd configuration
+- src: dev-sec.ssh-hardening
