@@ -23,5 +23,23 @@ def patch_ssh_hardening_template():
         print(f'No patch needed: {p.relative_to(REPO_ROOT)}')
 
 
+def patch_ssh_hardening_kex():
+    # dev-sec.ssh-hardening 9.7.0: sntrup4591761x25519-sha512@tinyssh.org was
+    # renamed to sntrup761x25519-sha512@openssh.com in OpenSSH 8.5; newer servers
+    # reject the old name during sshd_config validation.
+    p = REPO_ROOT / 'roles_external/dev-sec.ssh-hardening/defaults/main.yml'
+    original = p.read_text()
+    patched = original.replace(
+        'sntrup4591761x25519-sha512@tinyssh.org',
+        'sntrup761x25519-sha512@openssh.com',
+    )
+    if patched != original:
+        p.write_text(patched)
+        print(f'Patched: {p.relative_to(REPO_ROOT)}')
+    else:
+        print(f'No patch needed: {p.relative_to(REPO_ROOT)}')
+
+
 if __name__ == '__main__':
     patch_ssh_hardening_template()
+    patch_ssh_hardening_kex()
