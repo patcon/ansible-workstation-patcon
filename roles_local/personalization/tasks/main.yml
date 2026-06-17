@@ -12,5 +12,6 @@
     repo: "{{ item }}"
     dest: "{{ personalization_repos_dir }}/{{ item | split('/') | last | regex_replace('\\.git$', '') }}"
     accept_hostkey: true
-  become: false
+  become: true
+  become_user: "{{ personalization_user }}"
   loop: "{{ personalization_repos }}"

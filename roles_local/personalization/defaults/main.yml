@@ -1,5 +1,5 @@
 ---
-personalization_user: "{{ ansible_user_id }}"
-personalization_repos_dir: "~{{ personalization_user }}/repos"
+personalization_user: patcon
+personalization_repos_dir: "/home/{{ personalization_user }}/repos"
 personalization_repos:
   - git@github.com:patcon/ansible-workstation-patcon.git
