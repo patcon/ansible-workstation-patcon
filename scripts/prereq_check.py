@@ -2,34 +2,38 @@
 import subprocess
 import sys
 import os
+import re
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INVENTORY_FILE = os.path.join(REPO_ROOT, 'inventory', 'workstation.ini')
+SSH_CONFIG_FILE = os.path.expanduser('~/.ssh/config')
 
 IS_MACOS = sys.platform == 'darwin'
+
+# Both yes and true are valid SSH config boolean values
+SSH_TRUE = {'yes', 'true'}
 
 CHECKS = [
     {
         'key': 'forwardagent',
-        'expected': 'yes',
         'option': 'ForwardAgent yes',
         'reason': 'required so the remote host can pull from GitHub during converge_local',
         'scope': 'host',
     },
     {
         'key': 'addkeystoagent',
-        'expected': 'yes',
         'option': 'AddKeysToAgent yes',
         'reason': 'loads your SSH key into the agent automatically on first use',
         'scope': 'global',
     },
     {
         'key': 'usekeychain',
-        'expected': 'yes',
         'option': 'UseKeychain yes',
         'reason': 'persists your key passphrase in macOS Keychain across reboots',
         'scope': 'global',
         'macos_only': True,
+        # Apple extension: not output by `ssh -G`; parse ~/.ssh/config directly
+        'parse_raw': True,
     },
 ]
 
@@ -52,12 +56,29 @@ def get_workstation_host():
 
 
 def get_effective_ssh_config(host):
+    """Use `ssh -G` to get the merged effective config for a host."""
     result = subprocess.run(['ssh', '-G', host], capture_output=True, text=True)
     config = {}
     for line in result.stdout.splitlines():
         key, _, value = line.partition(' ')
         config[key.lower()] = value.lower()
     return config
+
+
+def get_raw_ssh_config_keys():
+    """Parse ~/.ssh/config for option keys present in any block (case-insensitive).
+    Used for Apple-specific options that ssh -G doesn't output."""
+    if not os.path.exists(SSH_CONFIG_FILE):
+        return set()
+    keys = set()
+    with open(SSH_CONFIG_FILE) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                key, _, value = line.partition(' ')
+                if value.strip().lower() in SSH_TRUE:
+                    keys.add(key.lower())
+    return keys
 
 
 def main():
@@ -71,6 +92,7 @@ def main():
     print()
 
     ssh_config = get_effective_ssh_config(host)
+    raw_keys = get_raw_ssh_config_keys()
 
     failed_host = []
     failed_global = []
@@ -78,7 +100,10 @@ def main():
     for check in CHECKS:
         if check.get('macos_only') and not IS_MACOS:
             continue
-        passed = ssh_config.get(check['key']) == check['expected']
+        if check.get('parse_raw'):
+            passed = check['key'] in raw_keys
+        else:
+            passed = ssh_config.get(check['key']) in SSH_TRUE
         status = 'ok    ' if passed else 'MISSING'
         print(f'  [{status}]  {check["option"]:30s}  # {check["reason"]}')
         if not passed:
