@@ -10,17 +10,18 @@ import pathlib
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 
 
-def patch_ssh_hardening_template():
+def patch_ssh_hardening_templates():
     # dev-sec.ssh-hardening 9.7.0: Jinja2 3.x requires bare booleans in
     # template headers; the role ships with quoted strings ("true"/"false").
-    p = REPO_ROOT / 'roles_external/dev-sec.ssh-hardening/templates/opensshd.conf.j2'
-    original = p.read_text()
-    patched = re.sub(r'"(true|false)"', lambda m: m.group(1).capitalize(), original)
-    if patched != original:
-        p.write_text(patched)
-        print(f'Patched: {p.relative_to(REPO_ROOT)}')
-    else:
-        print(f'No patch needed: {p.relative_to(REPO_ROOT)}')
+    templates_dir = REPO_ROOT / 'roles_external/dev-sec.ssh-hardening/templates'
+    for p in templates_dir.glob('**/*.j2'):
+        original = p.read_text()
+        patched = re.sub(r'"(true|false)"', lambda m: m.group(1).capitalize(), original)
+        if patched != original:
+            p.write_text(patched)
+            print(f'Patched: {p.relative_to(REPO_ROOT)}')
+        else:
+            print(f'No patch needed: {p.relative_to(REPO_ROOT)}')
 
 
 def patch_ssh_hardening_kex():
@@ -41,5 +42,5 @@ def patch_ssh_hardening_kex():
 
 
 if __name__ == '__main__':
-    patch_ssh_hardening_template()
+    patch_ssh_hardening_templates()
     patch_ssh_hardening_kex()
