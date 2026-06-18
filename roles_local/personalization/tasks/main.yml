@@ -1,4 +1,20 @@
 ---
+- name: Configure git user name
+  community.general.git_config:
+    name: user.name
+    scope: global
+    value: "{{ personalization_git_name }}"
+  become: true
+  become_user: "{{ personalization_user }}"
+
+- name: Configure git user email
+  community.general.git_config:
+    name: user.email
+    scope: global
+    value: "{{ personalization_git_email }}"
+  become: true
+  become_user: "{{ personalization_user }}"
+
 - name: Ensure ~/repos directory exists
   file:
     path: "{{ personalization_repos_dir }}"
