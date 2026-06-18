@@ -26,5 +26,9 @@
       tags: hardening
     - role: dev-sec.ssh-hardening
       tags: hardening
+      vars:
+        ssh_allow_agent_forwarding: true
+        ssh_server_permit_environment_vars: 'yes'
+        ssh_server_accept_env_vars: 'CLAUDE_CODE_OAUTH_TOKEN'
     - role: personalization
       tags: personalization
