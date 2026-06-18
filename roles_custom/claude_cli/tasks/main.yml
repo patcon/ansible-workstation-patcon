@@ -6,6 +6,34 @@
   become: true
   become_user: "{{ claude_cli_user }}"
 
+# Why: Without settings.json, Claude launches the interactive auth wizard on
+# first run even when CLAUDE_CODE_OAUTH_TOKEN is already set via SSH forwarding.
+- name: Ensure ~/.claude directory exists
+  file:
+    path: "/home/{{ claude_cli_user }}/.claude"
+    state: directory
+    owner: "{{ claude_cli_user }}"
+    group: "{{ claude_cli_user }}"
+    mode: '0700'
+
+- name: Deploy minimal claude settings to skip first-run auth wizard
+  copy:
+    dest: "/home/{{ claude_cli_user }}/.claude/settings.json"
+    content: "{}\n"
+    owner: "{{ claude_cli_user }}"
+    group: "{{ claude_cli_user }}"
+    mode: '0600'
+    force: false
+
+- name: Deploy ~/.claude.json to skip first-run onboarding wizard
+  copy:
+    dest: "/home/{{ claude_cli_user }}/.claude.json"
+    content: '{"hasCompletedOnboarding":true}'
+    owner: "{{ claude_cli_user }}"
+    group: "{{ claude_cli_user }}"
+    mode: '0600'
+    force: false
+
 # Why: If a credentials file exists, Claude ignores CLAUDE_CODE_OAUTH_TOKEN.
 # Removing it ensures the forwarded SSH env var is the sole auth source.
 - name: Remove stale claude credentials file
