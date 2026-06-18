@@ -32,5 +32,7 @@
         ssh_server_accept_env_vars: 'CLAUDE_CODE_OAUTH_TOKEN GITHUB_TOKEN'
     - role: github_cli
       tags: personalization
+    - role: claude_cli
+      tags: personalization
     - role: personalization
       tags: personalization

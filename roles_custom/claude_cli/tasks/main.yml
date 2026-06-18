@@ -1,0 +1,14 @@
+---
+- name: Install claude CLI via official installer
+  shell: curl -fsSL https://claude.ai/install.sh | bash
+  args:
+    creates: /usr/local/bin/claude
+  become: true
+  become_user: "{{ claude_cli_user }}"
+
+# Why: If a credentials file exists, Claude ignores CLAUDE_CODE_OAUTH_TOKEN.
+# Removing it ensures the forwarded SSH env var is the sole auth source.
+- name: Remove stale claude credentials file
+  file:
+    path: "/home/{{ claude_cli_user }}/.claude/.credentials.json"
+    state: absent
