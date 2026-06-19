@@ -2,6 +2,8 @@
 import subprocess
 import sys
 import os
+import textwrap
+import shutil
 
 SSH_CONFIG_FILE = os.path.expanduser('~/.ssh/config')
 
@@ -77,8 +79,10 @@ def get_effective_ssh_config(host):
 
 
 def print_check(status, label, reason):
+    width = shutil.get_terminal_size((60, 20)).columns
+    indent = '        '
     print(f'    [{status}]  {label}')
-    print(f'              {reason}')
+    print(textwrap.fill(reason, width=width, initial_indent=indent, subsequent_indent=indent))
 
 
 def get_raw_ssh_config_keys():
