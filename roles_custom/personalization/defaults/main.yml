@@ -4,5 +4,11 @@ personalization_repos_dir: "/home/{{ personalization_user }}/repos"
 personalization_repos:
   - git@github.com:patcon/ansible-workstation-patcon.git
   - git@github.com:patcon/dotfiles-pub.git
+  - git@github.com:patcon/polislike-human-cartography-prototype-v2.git
+  - git@github.com:polis-community/red-dwarf.git
+  - git@github.com:patcon/valency-anndata.git
+  - git@github.com:patcon/awesome-polis.git
+  - git@github.com:patcon/polislike-partykit-reaction-canvas.git
+  - git@github.com:patcon/polislike-opinion-map-painting.git
 personalization_git_name: patcon
 personalization_git_email: patrick.c.connolly@gmail.com
