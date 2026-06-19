@@ -36,3 +36,27 @@
       tags: personalization
     - role: personalization
       tags: personalization
+
+# Repo cloning runs in a separate play as patcon so SSH agent forwarding
+# works natively (become_user doesn't inherit SSH_AUTH_SOCK from root).
+- hosts: workstation
+  remote_user: patcon
+  become: false
+  gather_facts: false
+  tags: personalization
+  vars_files:
+    - ../roles_custom/personalization/defaults/main.yml
+  tasks:
+    - name: Ensure ~/repos directory exists
+      file:
+        path: "{{ personalization_repos_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Clone personal repos
+      git:
+        repo: "{{ item }}"
+        dest: "{{ personalization_repos_dir }}/{{ item | split('/') | last | regex_replace('\\.git$', '') }}"
+        accept_hostkey: true
+        update: false
+      loop: "{{ personalization_repos }}"

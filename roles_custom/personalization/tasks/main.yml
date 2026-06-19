@@ -15,20 +15,3 @@
   become: true
   become_user: "{{ personalization_user }}"
 
-- name: Ensure ~/repos directory exists
-  file:
-    path: "{{ personalization_repos_dir }}"
-    state: directory
-    owner: "{{ personalization_user }}"
-    group: "{{ personalization_user }}"
-    mode: '0755'
-
-- name: Clone personal repos
-  git:
-    repo: "{{ item }}"
-    dest: "{{ personalization_repos_dir }}/{{ item | split('/') | last | regex_replace('\\.git$', '') }}"
-    accept_hostkey: true
-    update: false
-  become: true
-  become_user: "{{ personalization_user }}"
-  loop: "{{ personalization_repos }}"
