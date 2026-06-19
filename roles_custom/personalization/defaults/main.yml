@@ -10,6 +10,7 @@ personalization_repos:
   - git@github.com:patcon/awesome-polis.git
   - git@github.com:patcon/polislike-partykit-reaction-canvas.git
   - git@github.com:patcon/polislike-opinion-map-painting.git
+  - git@github.com:patcon/nodescription.net-v2.git
 personalization_git_name: patcon
 personalization_git_email: patrick.c.connolly@gmail.com
 nvm_version: v0.40.5
