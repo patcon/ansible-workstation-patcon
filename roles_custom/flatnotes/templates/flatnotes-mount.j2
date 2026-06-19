@@ -13,15 +13,17 @@ usage() {
     exit 1
 }
 
+path_to_name() {
+    echo "$(basename "$(dirname "$1")")--$(basename "$1")"
+}
+
 recreate_container() {
     local vol_args=(-v "{{ flatnotes_data_dir }}:/data")
 
     if [[ -f "$MOUNTS_FILE" ]]; then
         while IFS= read -r path; do
             [[ -z "$path" ]] && continue
-            local name
-            name=$(basename "$path")
-            vol_args+=(-v "${path}:/data/${name}")
+            vol_args+=(-v "${path}:/data/$(path_to_name "$path")")
         done < "$MOUNTS_FILE"
     fi
 
@@ -54,10 +56,6 @@ case "${1:-}" in
         if grep -qxF "$path" "$MOUNTS_FILE"; then
             echo "$path is already mounted"
         else
-            name=$(basename "$path")
-            if grep -qF "/$name" "$MOUNTS_FILE"; then
-                echo "Warning: another file named '$name' is already mounted — it will be shadowed"
-            fi
             echo "$path" >> "$MOUNTS_FILE"
             recreate_container
         fi
@@ -80,7 +78,7 @@ case "${1:-}" in
             echo "Extra mounts:"
             while IFS= read -r path; do
                 [[ -z "$path" ]] && continue
-                echo "  $path -> /data/$(basename "$path")"
+                echo "  $path -> /data/$(path_to_name "$path")"
             done < "$MOUNTS_FILE"
         fi
         ;;
