@@ -1,0 +1,90 @@
+#!/bin/bash
+set -euo pipefail
+
+CONF_DIR="{{ flatnotes_data_dir | dirname }}"
+ENV_FILE="$CONF_DIR/run.env"
+MOUNTS_FILE="$CONF_DIR/extra-mounts.conf"
+CONTAINER_NAME="flatnotes"
+IMAGE="dullage/flatnotes:latest"
+PORT="{{ flatnotes_port }}"
+
+usage() {
+    echo "Usage: flatnotes-mount <add|remove|list> [file]"
+    exit 1
+}
+
+recreate_container() {
+    local vol_args=(-v "{{ flatnotes_data_dir }}:/data")
+
+    if [[ -f "$MOUNTS_FILE" ]]; then
+        while IFS= read -r path; do
+            [[ -z "$path" ]] && continue
+            local name
+            name=$(basename "$path")
+            vol_args+=(-v "${path}:/data/${name}")
+        done < "$MOUNTS_FILE"
+    fi
+
+    local env_args=()
+    if [[ -f "$ENV_FILE" ]]; then
+        while IFS= read -r line; do
+            [[ -z "$line" || "$line" == \#* ]] && continue
+            env_args+=(-e "$line")
+        done < "$ENV_FILE"
+    fi
+
+    echo "Recreating flatnotes container..."
+    docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
+    docker run -d \
+        --name "$CONTAINER_NAME" \
+        --restart unless-stopped \
+        -p "${PORT}:8080" \
+        "${vol_args[@]}" \
+        "${env_args[@]}" \
+        "$IMAGE"
+    echo "Done."
+}
+
+case "${1:-}" in
+    add)
+        [[ -z "${2:-}" ]] && usage
+        path=$(realpath "$2")
+        [[ ! -f "$path" ]] && echo "Error: $path is not a file" && exit 1
+        touch "$MOUNTS_FILE"
+        if grep -qxF "$path" "$MOUNTS_FILE"; then
+            echo "$path is already mounted"
+        else
+            name=$(basename "$path")
+            if grep -qF "/$name" "$MOUNTS_FILE"; then
+                echo "Warning: another file named '$name' is already mounted — it will be shadowed"
+            fi
+            echo "$path" >> "$MOUNTS_FILE"
+            recreate_container
+        fi
+        ;;
+    remove)
+        [[ -z "${2:-}" ]] && usage
+        path=$(realpath "$2")
+        touch "$MOUNTS_FILE"
+        if grep -qxF "$path" "$MOUNTS_FILE"; then
+            sed -i "\|^${path}$|d" "$MOUNTS_FILE"
+            recreate_container
+        else
+            echo "$path is not in the mount list"
+        fi
+        ;;
+    list)
+        if [[ ! -f "$MOUNTS_FILE" ]] || [[ ! -s "$MOUNTS_FILE" ]]; then
+            echo "No extra mounts configured."
+        else
+            echo "Extra mounts:"
+            while IFS= read -r path; do
+                [[ -z "$path" ]] && continue
+                echo "  $path -> /data/$(basename "$path")"
+            done < "$MOUNTS_FILE"
+        fi
+        ;;
+    *)
+        usage
+        ;;
+esac

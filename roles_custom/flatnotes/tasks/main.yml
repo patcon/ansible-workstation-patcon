@@ -7,6 +7,44 @@
     group: root
     mode: '0755'
 
+- name: Write run.env for flatnotes-mount script
+  template:
+    src: run.env.j2
+    dest: "{{ flatnotes_data_dir | dirname }}/run.env"
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Create extra-mounts.conf if absent
+  file:
+    path: "{{ flatnotes_data_dir | dirname }}/extra-mounts.conf"
+    state: touch
+    owner: root
+    group: root
+    mode: '0644'
+    modification_time: preserve
+    access_time: preserve
+
+- name: Install flatnotes-mount management script
+  template:
+    src: flatnotes-mount.j2
+    dest: /usr/local/bin/flatnotes-mount
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Read extra mounts config
+  slurp:
+    src: "{{ flatnotes_data_dir | dirname }}/extra-mounts.conf"
+  register: _extra_mounts_raw
+
+- name: Build volumes list
+  vars:
+    _paths: "{{ ((_extra_mounts_raw.content | b64decode).split('\n')) | select('match', '.+') | list }}"
+    _extra_vols: "{{ _paths | zip(_paths | map('basename')) | map('join', ':/data/') | list }}"
+  set_fact:
+    _flatnotes_volumes: "{{ [flatnotes_data_dir + ':/data'] + _extra_vols }}"
+
 - name: Build container environment variables
   set_fact:
     _flatnotes_env: >-
@@ -26,6 +64,5 @@
     restart_policy: unless-stopped
     ports:
       - "{{ flatnotes_port }}:8080"
-    volumes:
-      - "{{ flatnotes_data_dir }}:/data"
+    volumes: "{{ _flatnotes_volumes }}"
     env: "{{ _flatnotes_env }}"
