@@ -55,6 +55,30 @@
   become: true
   become_user: root
 
+- name: Install nvm
+  shell: curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_version }}/install.sh | bash
+  args:
+    creates: "/home/{{ workstation_user }}/.nvm/nvm.sh"
+  become: true
+  become_user: "{{ workstation_user }}"
+
+- name: Install Node.js LTS via nvm
+  shell: |
+    export NVM_DIR="/home/{{ workstation_user }}/.nvm"
+    . "$NVM_DIR/nvm.sh"
+    nvm install --lts
+  args:
+    creates: "/home/{{ workstation_user }}/.nvm/alias/default"
+  become: true
+  become_user: "{{ workstation_user }}"
+
+- name: Install pnpm via official install script
+  shell: curl -fsSL https://get.pnpm.io/install.sh | sh -
+  args:
+    creates: "/home/{{ workstation_user }}/.local/share/pnpm/bin/pnpm"
+  become: true
+  become_user: "{{ workstation_user }}"
+
 - name: Configure git user name
   community.general.git_config:
     name: user.name

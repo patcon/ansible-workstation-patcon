@@ -12,3 +12,4 @@ personalization_repos:
   - git@github.com:patcon/polislike-opinion-map-painting.git
 personalization_git_name: patcon
 personalization_git_email: patrick.c.connolly@gmail.com
+nvm_version: v0.40.5
