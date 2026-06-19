@@ -41,7 +41,7 @@
 - name: Build volumes list
   vars:
     _paths: "{{ ((_extra_mounts_raw.content | b64decode).split('\n')) | select('match', '.+') | list }}"
-    _extra_vols: "{{ _paths | zip(_paths | map('basename')) | map('join', ':/data/') | list }}"
+    _extra_vols: "{{ _paths | zip(_paths | map('regex_replace', '^.*/([^/]+)/([^/]+)$', '\\1--\\2')) | map('join', ':/data/') | list }}"
   set_fact:
     _flatnotes_volumes: "{{ [flatnotes_data_dir + ':/data'] + _extra_vols }}"
 
