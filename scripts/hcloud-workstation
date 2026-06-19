@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_NAME="$(basename "$0")"
+DEFAULT_NAME_SUFFIX="-main"
+
+usage() {
+  cat <<EOF
+Usage: $SCRIPT_NAME <command> [options]
+
+Commands:
+  up [name]     Create a new server (default name: workstation${DEFAULT_NAME_SUFFIX})
+  down <name>   Delete a server by name
+  list          List all servers
+
+Options:
+  -h, --help    Show this help
+EOF
+}
+
+die() { echo "Error: $*" >&2; exit 1; }
+
+require_hcloud() {
+  command -v hcloud &>/dev/null || die "hcloud CLI not found in PATH"
+}
+
+cmd_up() {
+  local name="${1:-workstation${DEFAULT_NAME_SUFFIX}}"
+
+  # Get cheapest server type by monthly cost
+  local server_type
+  server_type=$(hcloud server-type list -o noheader -o columns=name,monthly_cost \
+    | sort -t'€' -k1 -n \
+    | awk '{print $1}' \
+    | head -1)
+  [[ -n "$server_type" ]] || die "Could not determine cheapest server type"
+
+  # Get cheapest image (ubuntu LTS, prefer older = cheaper/available)
+  local image
+  image=$(hcloud image list -o noheader -o columns=name,type \
+    | awk '$2 == "system" {print $1}' \
+    | grep -E '^ubuntu-' \
+    | sort -V \
+    | head -1)
+  [[ -n "$image" ]] || die "Could not determine image"
+
+  # Get all SSH key names as comma-separated list
+  local ssh_keys
+  ssh_keys=$(hcloud ssh-key list -o noheader -o columns=name | paste -sd,)
+  [[ -n "$ssh_keys" ]] || die "No SSH keys found in Hetzner account — add one first"
+
+  echo "Creating server:"
+  echo "  Name:        $name"
+  echo "  Type:        $server_type"
+  echo "  Image:       $image"
+  echo "  SSH keys:    $ssh_keys"
+  echo ""
+
+  hcloud server create \
+    --name "$name" \
+    --type "$server_type" \
+    --image "$image" \
+    --ssh-key "$ssh_keys"
+}
+
+cmd_down() {
+  local name="${1:-}"
+  [[ -n "$name" ]] || die "Server name required: $SCRIPT_NAME down <name>"
+
+  echo "Deleting server: $name"
+  hcloud server delete "$name"
+}
+
+cmd_list() {
+  hcloud server list
+}
+
+require_hcloud
+
+case "${1:-}" in
+  up)    shift; cmd_up "$@" ;;
+  down)  shift; cmd_down "$@" ;;
+  list)  cmd_list ;;
+  -h|--help|help) usage ;;
+  "") usage; exit 1 ;;
+  *) die "Unknown command: $1. Run '$SCRIPT_NAME --help' for usage." ;;
+esac
