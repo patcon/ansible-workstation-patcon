@@ -1,5 +1,5 @@
 ---
-- hosts: workstation
+- hosts: all
   become: true
   pre_tasks:
     - name: Update apt cache
@@ -46,7 +46,7 @@
 
 # Repo cloning runs in a separate play as patcon so SSH agent forwarding
 # works natively (become_user doesn't inherit SSH_AUTH_SOCK from root).
-- hosts: workstation
+- hosts: all
   remote_user: patcon
   become: false
   gather_facts: false
