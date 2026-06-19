@@ -1,4 +1,40 @@
 ---
+- name: Ensure ~/.bashrc.d directory exists
+  file:
+    path: "/home/{{ personalization_user }}/.bashrc.d"
+    state: directory
+    owner: "{{ personalization_user }}"
+    group: "{{ personalization_user }}"
+    mode: '0755'
+  become: true
+  become_user: root
+
+- name: Ensure ~/.bashrc sources ~/.bashrc.d/
+  blockinfile:
+    path: "/home/{{ personalization_user }}/.bashrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: bashrc.d"
+    block: |
+      for f in ~/.bashrc.d/*.sh; do source "$f"; done
+    create: true
+    owner: "{{ personalization_user }}"
+    group: "{{ personalization_user }}"
+    mode: '0644'
+  become: true
+  become_user: root
+
+- name: Set SSH login starting directory to ansible-workstation-patcon
+  copy:
+    dest: "/home/{{ personalization_user }}/.bashrc.d/ssh-start-dir.sh"
+    content: |
+      if [[ -n "$SSH_CONNECTION" ]] && [[ $- == *i* ]]; then
+        cd ~/repos/ansible-workstation-patcon
+      fi
+    owner: "{{ personalization_user }}"
+    group: "{{ personalization_user }}"
+    mode: '0644'
+  become: true
+  become_user: root
+
 - name: Configure git user name
   community.general.git_config:
     name: user.name
