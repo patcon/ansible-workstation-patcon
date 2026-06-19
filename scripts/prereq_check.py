@@ -133,6 +133,26 @@ def main():
             failed_global.append(check['option'])
 
     print()
+    print('  ssh agent:')
+    failed_agent = []
+    if IS_TERMUX:
+        print(f'    [skip  ]  SSH agent checks skipped on Termux')
+    else:
+        agent_sock = os.environ.get('SSH_AUTH_SOCK', '')
+        sock_ok = bool(agent_sock) and os.path.exists(agent_sock)
+        status = 'ok    ' if sock_ok else 'MISSING'
+        print(f'    [{status}]  SSH_AUTH_SOCK                    # agent socket must exist for forwarding')
+        if not sock_ok:
+            failed_agent.append('SSH agent is not running (SSH_AUTH_SOCK unset or socket missing)')
+        else:
+            result = subprocess.run(['ssh-add', '-l'], capture_output=True)
+            has_keys = result.returncode == 0
+            status = 'ok    ' if has_keys else 'MISSING'
+            print(f'    [{status}]  ssh-add -l                       # at least one key must be loaded to forward')
+            if not has_keys:
+                failed_agent.append('No keys loaded in SSH agent — run: ssh-add ~/.ssh/id_ed25519 (or your key path)')
+
+    print()
     print('  env vars:')
     warned_vars = []
     for check in ENV_VAR_CHECKS:
@@ -142,7 +162,7 @@ def main():
         if not present:
             warned_vars.append(check['var'])
 
-    if not failed_hosts and not failed_global:
+    if not failed_hosts and not failed_global and not failed_agent:
         print()
         if warned_vars:
             print(f'WARNING: {", ".join(warned_vars)} not set — tokens will not be forwarded over SSH.')
@@ -151,18 +171,25 @@ def main():
         return
 
     print()
-    print('Add the following to ~/.ssh/config:')
-    print()
-    for alias, opts in failed_hosts.items():
-        print(f'Host {alias}')
-        for opt in opts:
-            print(f'    {opt}')
+    if failed_agent:
+        print('Fix the following SSH agent issues:')
         print()
-    if failed_global:
-        print('Host *')
-        for opt in failed_global:
-            print(f'    {opt}')
+        for msg in failed_agent:
+            print(f'  - {msg}')
         print()
+    if failed_hosts or failed_global:
+        print('Add the following to ~/.ssh/config:')
+        print()
+        for alias, opts in failed_hosts.items():
+            print(f'Host {alias}')
+            for opt in opts:
+                print(f'    {opt}')
+            print()
+        if failed_global:
+            print('Host *')
+            for opt in failed_global:
+                print(f'    {opt}')
+            print()
 
     sys.exit(1)
 
