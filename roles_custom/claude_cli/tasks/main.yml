@@ -28,10 +28,10 @@
     group: "{{ claude_cli_user }}"
     mode: '0700'
 
-- name: Deploy minimal claude settings to skip first-run auth wizard
-  copy:
+- name: Deploy claude settings on first install
+  template:
+    src: settings.json.j2
     dest: "/home/{{ claude_cli_user }}/.claude/settings.json"
-    content: "{}\n"
     owner: "{{ claude_cli_user }}"
     group: "{{ claude_cli_user }}"
     mode: '0600'
