@@ -1,36 +1,36 @@
 ---
 - name: Ensure ~/.bashrc.d directory exists
   file:
-    path: "/home/{{ personalization_user }}/.bashrc.d"
+    path: "/home/{{ workstation_user }}/.bashrc.d"
     state: directory
-    owner: "{{ personalization_user }}"
-    group: "{{ personalization_user }}"
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
     mode: '0755'
   become: true
   become_user: root
 
 - name: Ensure ~/.bashrc sources ~/.bashrc.d/
   blockinfile:
-    path: "/home/{{ personalization_user }}/.bashrc"
+    path: "/home/{{ workstation_user }}/.bashrc"
     marker: "# {mark} ANSIBLE MANAGED BLOCK: bashrc.d"
     block: |
       for f in ~/.bashrc.d/*.sh; do source "$f"; done
     create: true
-    owner: "{{ personalization_user }}"
-    group: "{{ personalization_user }}"
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
     mode: '0644'
   become: true
   become_user: root
 
 - name: Set SSH login starting directory to ansible-workstation-patcon
   copy:
-    dest: "/home/{{ personalization_user }}/.bashrc.d/ssh-start-dir.sh"
+    dest: "/home/{{ workstation_user }}/.bashrc.d/ssh-start-dir.sh"
     content: |
       if [[ -n "$SSH_CONNECTION" ]] && [[ $- == *i* ]]; then
         cd ~/repos/ansible-workstation-patcon
       fi
-    owner: "{{ personalization_user }}"
-    group: "{{ personalization_user }}"
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
     mode: '0644'
   become: true
   become_user: root
@@ -41,7 +41,7 @@
     scope: global
     value: "{{ personalization_git_name }}"
   become: true
-  become_user: "{{ personalization_user }}"
+  become_user: "{{ workstation_user }}"
 
 - name: Configure git user email
   community.general.git_config:
@@ -49,5 +49,5 @@
     scope: global
     value: "{{ personalization_git_email }}"
   become: true
-  become_user: "{{ personalization_user }}"
+  become_user: "{{ workstation_user }}"
 

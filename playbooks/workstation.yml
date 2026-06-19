@@ -53,7 +53,7 @@
 # Repo cloning runs in a separate play as patcon so SSH agent forwarding
 # works natively (become_user doesn't inherit SSH_AUTH_SOCK from root).
 - hosts: all
-  remote_user: patcon
+  remote_user: "{{ workstation_user }}"
   become: false
   gather_facts: false
   tags: personalization
