@@ -27,22 +27,9 @@ require_hcloud() {
 cmd_up() {
   local name="${1:-workstation${DEFAULT_NAME_SUFFIX}}"
 
-  # Get cheapest server type by monthly cost
-  local server_type
-  server_type=$(hcloud server-type list -o noheader -o columns=name,monthly_cost \
-    | sort -t'€' -k1 -n \
-    | awk '{print $1}' \
-    | head -1)
-  [[ -n "$server_type" ]] || die "Could not determine cheapest server type"
-
-  # Get cheapest image (ubuntu LTS, prefer older = cheaper/available)
-  local image
-  image=$(hcloud image list -o noheader -o columns=name,type \
-    | awk '$2 == "system" {print $1}' \
-    | grep -E '^ubuntu-' \
-    | sort -V \
-    | head -1)
-  [[ -n "$image" ]] || die "Could not determine image"
+  local server_type="cx23"
+  local image="ubuntu-26.04"
+  local location="hel1"
 
   # Get all SSH key names as comma-separated list
   local ssh_keys
@@ -53,6 +40,7 @@ cmd_up() {
   echo "  Name:        $name"
   echo "  Type:        $server_type"
   echo "  Image:       $image"
+  echo "  Location:    $location"
   echo "  SSH keys:    $ssh_keys"
   echo ""
 
@@ -60,6 +48,7 @@ cmd_up() {
     --name "$name" \
     --type "$server_type" \
     --image "$image" \
+    --location "$location" \
     --ssh-key "$ssh_keys"
 }
 
