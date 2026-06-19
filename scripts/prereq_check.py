@@ -11,6 +11,17 @@ IS_TERMUX = os.path.isdir('/data/data/com.termux')
 # Both yes and true are valid SSH config boolean values
 SSH_TRUE = {'yes', 'true'}
 
+ENV_VAR_CHECKS = [
+    {
+        'var': 'CLAUDE_CODE_OAUTH_TOKEN',
+        'reason': 'forwarded to remote host for Claude Code authentication',
+    },
+    {
+        'var': 'GITHUB_TOKEN',
+        'reason': 'forwarded to remote host for GitHub access',
+    },
+]
+
 CHECKS = [
     {
         'key': 'forwardagent',
@@ -121,9 +132,22 @@ def main():
         if not passed:
             failed_global.append(check['option'])
 
+    print()
+    print('  env vars:')
+    warned_vars = []
+    for check in ENV_VAR_CHECKS:
+        present = check['var'] in os.environ
+        status = 'ok    ' if present else 'UNSET '
+        print(f'    [{status}]  {check["var"]:30s}  # {check["reason"]}')
+        if not present:
+            warned_vars.append(check['var'])
+
     if not failed_hosts and not failed_global:
         print()
-        print('All checks passed.')
+        if warned_vars:
+            print(f'WARNING: {", ".join(warned_vars)} not set — tokens will not be forwarded over SSH.')
+        else:
+            print('All checks passed.')
         return
 
     print()
