@@ -5,6 +5,18 @@
     creates: /usr/local/bin/claude
   become: true
   become_user: "{{ claude_cli_user }}"
+  register: claude_cli_install
+
+# The installer auto-creates these files with defaults that block our templates.
+# Delete them only on first install so subsequent runs leave user edits intact.
+- name: Remove installer-generated config files on first install
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/home/{{ claude_cli_user }}/.claude.json"
+    - "/home/{{ claude_cli_user }}/.claude/settings.json"
+  when: claude_cli_install.changed
 
 # Why: Without settings.json, Claude launches the interactive auth wizard on
 # first run even when CLAUDE_CODE_OAUTH_TOKEN is already set via SSH forwarding.
