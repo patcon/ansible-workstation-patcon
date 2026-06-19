@@ -28,7 +28,7 @@ CHECKS = [
     {
         'key': 'forwardagent',
         'option': 'ForwardAgent yes',
-        'reason': 'required so the remote host can pull from GitHub during converge_local',
+        'reason': 'required so the remote host can authenticate to git repos over SSH',
         'scope': 'host',
     },
     {
