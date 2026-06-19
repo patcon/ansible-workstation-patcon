@@ -25,8 +25,9 @@
     - role: dev-sec.os-hardening
       tags: hardening
       vars:
-        # Docker requires IP forwarding to route external traffic into containers
-        os_net_forwarding: true
+        sysctl_overwrite:
+          # Docker requires IP forwarding to route external traffic into containers
+          net.ipv4.ip_forward: 1
     - role: dev-sec.ssh-hardening
       tags: hardening
       vars:
