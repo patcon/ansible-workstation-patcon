@@ -36,6 +36,13 @@
       tags: personalization
     - role: personalization
       tags: personalization
+  post_tasks:
+    - name: Restart sshd after ssh-hardening
+      service:
+        name: sshd
+        state: restarted
+      become: true
+      tags: hardening
 
 # Repo cloning runs in a separate play as patcon so SSH agent forwarding
 # works natively (become_user doesn't inherit SSH_AUTH_SOCK from root).
