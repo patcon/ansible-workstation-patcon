@@ -24,6 +24,9 @@
       tags: bootstrap
     - role: dev-sec.os-hardening
       tags: hardening
+      vars:
+        # Docker requires IP forwarding to route external traffic into containers
+        os_net_forwarding: true
     - role: dev-sec.ssh-hardening
       tags: hardening
       vars:
@@ -36,6 +39,8 @@
       tags: personalization
     - role: personalization
       tags: personalization
+    - role: geerlingguy.docker
+    - role: flatnotes
   post_tasks:
     - name: Restart sshd after ssh-hardening
       service:

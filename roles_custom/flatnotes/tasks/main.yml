@@ -1,0 +1,31 @@
+---
+- name: Ensure flatnotes data directory exists
+  file:
+    path: "{{ flatnotes_data_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Build container environment variables
+  set_fact:
+    _flatnotes_env: >-
+      {{
+        {'FLATNOTES_AUTH_TYPE': flatnotes_auth_type}
+        | combine({'FLATNOTES_USERNAME': flatnotes_username} if flatnotes_username else {})
+        | combine({'FLATNOTES_PASSWORD': flatnotes_password} if flatnotes_password else {})
+        | combine({'FLATNOTES_SECRET_KEY': flatnotes_secret_key} if flatnotes_secret_key else {})
+        | combine({'FLATNOTES_TOTP_KEY': flatnotes_totp_key} if flatnotes_totp_key else {})
+      }}
+
+- name: Run flatnotes container
+  community.docker.docker_container:
+    name: flatnotes
+    image: dullage/flatnotes:latest
+    state: "{{ 'started' if flatnotes_enabled else 'absent' }}"
+    restart_policy: unless-stopped
+    ports:
+      - "{{ flatnotes_port }}:8080"
+    volumes:
+      - "{{ flatnotes_data_dir }}:/data"
+    env: "{{ _flatnotes_env }}"

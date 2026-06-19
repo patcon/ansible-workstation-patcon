@@ -4,3 +4,6 @@
 
 # Why: Hardens sshd configuration
 - src: dev-sec.ssh-hardening
+
+# Why: Installs Docker Engine and ensures the daemon is started and enabled
+- src: geerlingguy.docker

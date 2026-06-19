@@ -1,0 +1,24 @@
+---
+flatnotes_enabled: true
+flatnotes_port: 8080
+flatnotes_data_dir: /opt/flatnotes/data
+
+# Supported values:
+#   none       - No authentication. Anyone with network access can read and write.
+#   read_only  - No authentication, but site is read-only (no create/edit/delete).
+#   password   - Username + password login. Requires flatnotes_username,
+#                flatnotes_password, and flatnotes_secret_key below.
+#   totp       - Username + password + TOTP 2FA. Same as password but also
+#                requires flatnotes_totp_key. On first start, flatnotes prints a
+#                QR code to add to an authenticator app (e.g. Authy).
+flatnotes_auth_type: none
+
+# Required for password and totp auth types.
+# flatnotes_secret_key should be a random 32-character string.
+flatnotes_username: ~
+flatnotes_password: ~
+flatnotes_secret_key: ~
+
+# Required for totp auth type only.
+# Should be a random 32-character string.
+flatnotes_totp_key: ~
