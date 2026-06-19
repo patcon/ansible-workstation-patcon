@@ -76,6 +76,11 @@ def get_effective_ssh_config(host):
     return config
 
 
+def print_check(status, label, reason):
+    print(f'    [{status}]  {label}')
+    print(f'              {reason}')
+
+
 def get_raw_ssh_config_keys():
     """Parse ~/.ssh/config for option keys present in any block (case-insensitive).
     Used for Apple-specific options that ssh -G doesn't output."""
@@ -115,7 +120,7 @@ def main():
         for check in host_checks:
             passed = ssh_config.get(check['key']) in SSH_TRUE
             status = 'ok    ' if passed else 'MISSING'
-            print(f'    [{status}]  {check["option"]:30s}  # {check["reason"]}')
+            print_check(status, check['option'], check['reason'])
             if not passed:
                 failed_hosts.setdefault(alias, []).append(check['option'])
 
@@ -128,7 +133,7 @@ def main():
             continue
         passed = check['key'] in raw_keys
         status = 'ok    ' if passed else 'MISSING'
-        print(f'    [{status}]  {check["option"]:30s}  # {check["reason"]}')
+        print_check(status, check['option'], check['reason'])
         if not passed:
             failed_global.append(check['option'])
 
@@ -138,14 +143,14 @@ def main():
     agent_sock = os.environ.get('SSH_AUTH_SOCK', '')
     sock_ok = bool(agent_sock) and os.path.exists(agent_sock)
     status = 'ok    ' if sock_ok else 'MISSING'
-    print(f'    [{status}]  SSH_AUTH_SOCK                    # agent socket must exist for forwarding')
+    print_check(status, 'SSH_AUTH_SOCK', 'agent socket must exist for forwarding')
     if not sock_ok:
         failed_agent.append('SSH agent is not running (SSH_AUTH_SOCK unset or socket missing)')
     else:
         result = subprocess.run(['ssh-add', '-l'], capture_output=True)
         has_keys = result.returncode == 0
         status = 'ok    ' if has_keys else 'MISSING'
-        print(f'    [{status}]  ssh-add -l                       # at least one key must be loaded to forward')
+        print_check(status, 'ssh-add -l', 'at least one key must be loaded to forward')
         if not has_keys:
             failed_agent.append('No keys loaded in SSH agent — run: ssh-add ~/.ssh/id_ed25519 (or your key path)')
 
@@ -155,7 +160,7 @@ def main():
     for check in ENV_VAR_CHECKS:
         present = check['var'] in os.environ
         status = 'ok    ' if present else 'UNSET '
-        print(f'    [{status}]  {check["var"]:30s}  # {check["reason"]}')
+        print_check(status, check['var'], check['reason'])
         if not present:
             warned_vars.append(check['var'])
 
