@@ -35,6 +35,26 @@
   become: true
   become_user: root
 
+- name: Ensure ~/.local/bin exists
+  file:
+    path: "/home/{{ workstation_user }}/.local/bin"
+    state: directory
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: '0755'
+  become: true
+  become_user: root
+
+- name: Install repo-salvage script
+  copy:
+    src: repo-salvage
+    dest: "/home/{{ workstation_user }}/.local/bin/repo-salvage"
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: '0755'
+  become: true
+  become_user: root
+
 - name: Configure git user name
   community.general.git_config:
     name: user.name
