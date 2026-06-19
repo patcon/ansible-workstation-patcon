@@ -33,7 +33,7 @@ cmd_up() {
       name="workstation-main"
     else
       local last next
-      last=$(echo "$existing" | grep -E '^workstation-test[0-9]+$' | sed 's/workstation-test//' | sort -n | tail -1)
+      last=$(echo "$existing" | grep -E '^workstation-test[0-9]+$' | sed 's/workstation-test//' | sort -n | tail -1 || true)
       next=$(( ${last:-0} + 1 ))
       name="workstation-test${next}"
     fi
