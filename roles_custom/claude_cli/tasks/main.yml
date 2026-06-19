@@ -2,7 +2,7 @@
 - name: Install claude CLI via official installer
   shell: curl -fsSL https://claude.ai/install.sh | bash
   args:
-    creates: /usr/local/bin/claude
+    creates: "/home/{{ claude_cli_user }}/.local/bin/claude"
   become: true
   become_user: "{{ claude_cli_user }}"
   register: claude_cli_install
