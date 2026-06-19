@@ -2,14 +2,13 @@
 set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
-DEFAULT_NAME_SUFFIX="-main"
 
 usage() {
   cat <<EOF
 Usage: $SCRIPT_NAME <command> [options]
 
 Commands:
-  up [name]     Create a new server (default name: workstation${DEFAULT_NAME_SUFFIX})
+  up [name]     Create a new server (auto-names: workstation-main, then workstation-test1, test2, ...)
   down <name>   Delete a server by name
   list          List all servers
 
@@ -25,7 +24,20 @@ require_hcloud() {
 }
 
 cmd_up() {
-  local name="${1:-workstation${DEFAULT_NAME_SUFFIX}}"
+  local name="${1:-}"
+
+  if [[ -z "$name" ]]; then
+    local existing
+    existing=$(hcloud server list -o noheader -o columns=name 2>/dev/null)
+    if ! echo "$existing" | grep -qx 'workstation-main'; then
+      name="workstation-main"
+    else
+      local last next
+      last=$(echo "$existing" | grep -E '^workstation-test[0-9]+$' | sed 's/workstation-test//' | sort -n | tail -1)
+      next=$(( ${last:-0} + 1 ))
+      name="workstation-test${next}"
+    fi
+  fi
 
   local server_type="cx23"
   local image="ubuntu-26.04"
