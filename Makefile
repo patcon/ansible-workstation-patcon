@@ -14,10 +14,10 @@ remote_init: ## SSH into fresh server, install Ansible, and run local_bootstrap 
 	ssh root@$(REMOTE_HOST) 'bash -s' < scripts/remote_init.sh
 
 remote_bootstrap: install_roles ## Run bootstrap role on remote host (override: REMOTE_HOST=other)
-	ansible-playbook -i "$(REMOTE_HOST)," -u root playbooks/workstation.yml --tags bootstrap
+	ansible-playbook --inventory "$(REMOTE_HOST)," --user root playbooks/workstation.yml --tags bootstrap
 
 remote_converge: install_roles ## Full converge on remote host (override: REMOTE_HOST=other)
-	ansible-playbook -i "$(REMOTE_HOST)," -u root playbooks/workstation.yml
+	ansible-playbook --inventory "$(REMOTE_HOST)," --user root playbooks/workstation.yml
 
 local_bootstrap: install_roles ## Run bootstrap locally on this machine (used by remote_init)
 	ansible-playbook playbooks/workstation.yml --tags bootstrap --connection=local
