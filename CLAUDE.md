@@ -5,12 +5,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```sh
-make prereq_check    # Verify ~/.ssh/config has required settings before running remotely
-make install_roles   # Download external roles/collections from Ansible Galaxy + apply patches
-make bootstrap       # First-time setup: create sudo user and authorize SSH keys (run before hardening)
-make converge        # Apply full playbook over SSH to the remote workstation
-make converge_local  # Apply full playbook locally (requires ansible installed on target)
-make check           # Dry-run with diff output (no changes applied)
+make prereq_check                        # Verify ~/.ssh/config has required settings before running remotely
+make install_roles                       # Download external roles/collections from Ansible Galaxy + apply patches
+make remote_init REMOTE_HOST=<host>      # SSH into fresh server, install Ansible, clone repo, run local_bootstrap
+make remote_bootstrap REMOTE_HOST=<host> # Run bootstrap role on remote host (creates sudo user, authorizes SSH keys)
+make remote_converge REMOTE_HOST=<host>  # Apply full playbook over SSH to remote host
+make local_bootstrap                     # Run bootstrap role locally
+make local_converge                      # Apply full playbook locally (requires ansible installed on target)
+make check                               # Dry-run with diff output (no changes applied)
 ```
 
 `install_roles` is a prerequisite of all playbook targets; it always runs first.
