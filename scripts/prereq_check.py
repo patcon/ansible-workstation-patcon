@@ -135,22 +135,19 @@ def main():
     print()
     print('  ssh agent:')
     failed_agent = []
-    if IS_TERMUX:
-        print(f'    [skip  ]  SSH agent checks skipped on Termux')
+    agent_sock = os.environ.get('SSH_AUTH_SOCK', '')
+    sock_ok = bool(agent_sock) and os.path.exists(agent_sock)
+    status = 'ok    ' if sock_ok else 'MISSING'
+    print(f'    [{status}]  SSH_AUTH_SOCK                    # agent socket must exist for forwarding')
+    if not sock_ok:
+        failed_agent.append('SSH agent is not running (SSH_AUTH_SOCK unset or socket missing)')
     else:
-        agent_sock = os.environ.get('SSH_AUTH_SOCK', '')
-        sock_ok = bool(agent_sock) and os.path.exists(agent_sock)
-        status = 'ok    ' if sock_ok else 'MISSING'
-        print(f'    [{status}]  SSH_AUTH_SOCK                    # agent socket must exist for forwarding')
-        if not sock_ok:
-            failed_agent.append('SSH agent is not running (SSH_AUTH_SOCK unset or socket missing)')
-        else:
-            result = subprocess.run(['ssh-add', '-l'], capture_output=True)
-            has_keys = result.returncode == 0
-            status = 'ok    ' if has_keys else 'MISSING'
-            print(f'    [{status}]  ssh-add -l                       # at least one key must be loaded to forward')
-            if not has_keys:
-                failed_agent.append('No keys loaded in SSH agent — run: ssh-add ~/.ssh/id_ed25519 (or your key path)')
+        result = subprocess.run(['ssh-add', '-l'], capture_output=True)
+        has_keys = result.returncode == 0
+        status = 'ok    ' if has_keys else 'MISSING'
+        print(f'    [{status}]  ssh-add -l                       # at least one key must be loaded to forward')
+        if not has_keys:
+            failed_agent.append('No keys loaded in SSH agent — run: ssh-add ~/.ssh/id_ed25519 (or your key path)')
 
     print()
     print('  env vars:')
