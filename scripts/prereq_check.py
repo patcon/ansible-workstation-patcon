@@ -2,13 +2,11 @@
 import subprocess
 import sys
 import os
-import re
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-INVENTORY_FILE = os.path.join(REPO_ROOT, 'inventory', 'workstation.ini')
 SSH_CONFIG_FILE = os.path.expanduser('~/.ssh/config')
 
 IS_MACOS = sys.platform == 'darwin'
+IS_TERMUX = os.path.isdir('/data/data/com.termux')
 
 # Both yes and true are valid SSH config boolean values
 SSH_TRUE = {'yes', 'true'}
@@ -25,6 +23,7 @@ CHECKS = [
         'option': 'AddKeysToAgent yes',
         'reason': 'loads your SSH key into the agent automatically on first use',
         'scope': 'global',
+        'skip_termux': True,
     },
     {
         'key': 'usekeychain',
@@ -38,21 +37,22 @@ CHECKS = [
 ]
 
 
-def get_workstation_host():
-    with open(INVENTORY_FILE) as f:
-        lines = f.readlines()
-    in_section = False
-    for line in lines:
-        line = line.strip()
-        if line == '[workstation]':
-            in_section = True
-            continue
-        if in_section:
-            if not line or line.startswith('['):
-                break
-            if not line.startswith('#'):
-                return line
-    return None
+def find_workstation_aliases():
+    """Return all Host entries in ~/.ssh/config matching 'workstation*'."""
+    if not os.path.exists(SSH_CONFIG_FILE):
+        return []
+    aliases = []
+    with open(SSH_CONFIG_FILE) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            key, _, value = line.partition(' ')
+            if key.lower() == 'host':
+                alias = value.strip()
+                if alias.startswith('workstation') and '*' not in alias:
+                    aliases.append(alias)
+    return aliases
 
 
 def get_effective_ssh_config(host):
@@ -82,37 +82,46 @@ def get_raw_ssh_config_keys():
 
 
 def main():
-    host = get_workstation_host()
-    if not host:
-        print('ERROR: No host found in [workstation] section of inventory/workstation.ini')
+    aliases = find_workstation_aliases()
+    if not aliases:
+        print('ERROR: No Host entries matching workstation* found in ~/.ssh/config')
         sys.exit(1)
 
-    print(f'Workstation: {host}')
+    print(f'Found workstation SSH hosts: {", ".join(aliases)}')
     print(f'Checking ~/.ssh/config ...')
-    print()
 
-    ssh_config = get_effective_ssh_config(host)
     raw_keys = get_raw_ssh_config_keys()
+    host_checks = [c for c in CHECKS if c['scope'] == 'host']
+    global_checks = [c for c in CHECKS if c['scope'] == 'global']
 
-    failed_host = []
+    failed_hosts = {}
     failed_global = []
 
-    for check in CHECKS:
+    for alias in aliases:
+        print()
+        print(f'  {alias}:')
+        ssh_config = get_effective_ssh_config(alias)
+        for check in host_checks:
+            passed = ssh_config.get(check['key']) in SSH_TRUE
+            status = 'ok    ' if passed else 'MISSING'
+            print(f'    [{status}]  {check["option"]:30s}  # {check["reason"]}')
+            if not passed:
+                failed_hosts.setdefault(alias, []).append(check['option'])
+
+    print()
+    print('  global:')
+    for check in global_checks:
         if check.get('macos_only') and not IS_MACOS:
             continue
-        if check.get('parse_raw'):
-            passed = check['key'] in raw_keys
-        else:
-            passed = ssh_config.get(check['key']) in SSH_TRUE
+        if check.get('skip_termux') and IS_TERMUX:
+            continue
+        passed = check['key'] in raw_keys
         status = 'ok    ' if passed else 'MISSING'
-        print(f'  [{status}]  {check["option"]:30s}  # {check["reason"]}')
+        print(f'    [{status}]  {check["option"]:30s}  # {check["reason"]}')
         if not passed:
-            if check['scope'] == 'host':
-                failed_host.append(check['option'])
-            else:
-                failed_global.append(check['option'])
+            failed_global.append(check['option'])
 
-    if not failed_host and not failed_global:
+    if not failed_hosts and not failed_global:
         print()
         print('All checks passed.')
         return
@@ -120,9 +129,9 @@ def main():
     print()
     print('Add the following to ~/.ssh/config:')
     print()
-    if failed_host:
-        print(f'Host {host}')
-        for opt in failed_host:
+    for alias, opts in failed_hosts.items():
+        print(f'Host {alias}')
+        for opt in opts:
             print(f'    {opt}')
         print()
     if failed_global:
