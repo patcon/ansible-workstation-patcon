@@ -28,5 +28,5 @@ echo "Waiting for SSH as patcon on $ip..."
 until ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no patcon@"$ip" true 2>/dev/null; do
   sleep 5
 done
-ssh -o StrictHostKeyChecking=no patcon@"$ip" \
-  'cd /tmp/ansible-workstation-patcon && sudo make local_converge'
+ssh -A -o StrictHostKeyChecking=no patcon@"$ip" \
+  'cd /tmp/ansible-workstation-patcon && sudo --preserve-env=SSH_AUTH_SOCK make local_converge'
