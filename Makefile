@@ -25,6 +25,9 @@ local_bootstrap: install_roles ## Run bootstrap locally on this machine (used by
 local_converge: install_roles ## Converge the workstation locally (usually faster)
 	ansible-playbook playbooks/workstation.yml --connection=local
 
+device_termux_android: ## Install Termux support scripts locally (clipboard, ssh-clipboard)
+	bash support/termux/setup-clipboard.sh
+
 device_ubuntu_desktop: ## Install ubuntu-desktop support scripts locally (clipboard, ssh-clipboard)
 	bash support/ubuntu-desktop/setup.sh
 

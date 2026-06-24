@@ -1,0 +1,8 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -euo pipefail
+
+clipboard-receiver &
+CLIPBOARD_PID=$!
+trap "kill $CLIPBOARD_PID 2>/dev/null" EXIT
+
+ssh "$@"
