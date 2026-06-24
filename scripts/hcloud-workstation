@@ -68,6 +68,8 @@ cmd_up() {
     --image "$image" \
     --location "$location" \
     --ssh-key "$ssh_keys"
+
+  echo "$name"
 }
 
 cmd_down() {

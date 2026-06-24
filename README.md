@@ -12,8 +12,8 @@ ln -s ~/repos/ansible-workstation-patcon/support/termux/shortcuts ~/.shortcuts
 
 Available shortcuts:
 
-- **hcloud-workstation-up** — create a new workstation server (auto-named)
-- **hcloud-workstation-list** — list all servers
+- **workstation-up** — create a new workstation server (auto-named), then bootstrap and converge it
+- **workstation-list** — list all servers
 
 ## Bootstrap from Termux
 
