@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+tee ~/.clipboard | nc -q0 localhost 5556

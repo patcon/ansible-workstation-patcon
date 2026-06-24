@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+systemctl --user start clipboard-receiver
+trap 'systemctl --user stop clipboard-receiver' EXIT
+
+ssh "$@"

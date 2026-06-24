@@ -55,6 +55,26 @@
   become: true
   become_user: root
 
+- name: Install pbcopy script
+  copy:
+    src: pbcopy
+    dest: "/home/{{ workstation_user }}/.local/bin/pbcopy"
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: '0755'
+  become: true
+  become_user: root
+
+- name: Install pbpaste script
+  copy:
+    src: pbpaste
+    dest: "/home/{{ workstation_user }}/.local/bin/pbpaste"
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: '0755'
+  become: true
+  become_user: root
+
 - name: Install zsh
   ansible.builtin.apt:
     name: zsh

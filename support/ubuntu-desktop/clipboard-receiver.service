@@ -1,0 +1,12 @@
+[Unit]
+Description=Remote clipboard receiver (port 5556)
+After=network.target
+
+[Service]
+ExecStart=%h/.local/bin/clipboard-receiver
+Restart=on-failure
+Environment=DISPLAY=:0
+Environment=WAYLAND_DISPLAY=wayland-0
+
+[Install]
+WantedBy=default.target
