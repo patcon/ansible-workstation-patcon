@@ -48,8 +48,9 @@ else:
 open(config_path, 'w').write(content)
 PYEOF
 
-# Fresh server always has a new host key; drop any stale entry to avoid known_hosts conflict
+# Fresh server always has a new host key; drop any stale entries to avoid known_hosts conflict
 ssh-keygen -R "$ip" 2>/dev/null || true
+ssh-keygen -R "$name" 2>/dev/null || true
 
 # Phase 1: root SSH — install Ansible, run bootstrap (creates patcon user, hardens SSH)
 echo "Waiting for SSH on $ip..."
