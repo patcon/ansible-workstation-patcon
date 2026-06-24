@@ -1,6 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -euo pipefail
 
+# Termux Widget runs in a real terminal; bail early in non-interactive contexts
+if ! test -w /dev/tty; then
+  echo "Error: /dev/tty not available — run this in a real terminal" >&2
+  exit 1
+fi
+
 REPO=~/repos/ansible-workstation-patcon
 
 # Create server; show output but capture final line (server name)
