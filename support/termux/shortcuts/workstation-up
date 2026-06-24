@@ -16,6 +16,38 @@ name=$(cd "$REPO" && scripts/hcloud-workstation up | tee /dev/tty | tail -1)
 ip=$(hcloud server describe "$name" -o json \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['public_net']['ipv4']['ip'])")
 
+# Add or update ~/.ssh/config entry so the server is reachable by name
+SSH_NAME="$name" SSH_IP="$ip" python3 << 'PYEOF'
+import re, os
+
+name = os.environ['SSH_NAME']
+ip = os.environ['SSH_IP']
+config_path = os.path.expanduser('~/.ssh/config')
+
+try:
+    content = open(config_path).read()
+except FileNotFoundError:
+    content = ''
+
+pattern = rf'^(Host {re.escape(name)}\n)((?:[ \t]+[^\n]*\n)*)'
+
+def update_block(m):
+    header, body = m.group(1), m.group(2)
+    if re.search(r'^[ \t]+HostName[ \t]+', body, re.MULTILINE):
+        body = re.sub(r'^([ \t]+HostName[ \t]+)\S+', rf'\g<1>{ip}', body, flags=re.MULTILINE)
+    else:
+        body = f'    HostName {ip}\n' + body
+    return header + body
+
+if re.search(pattern, content, re.MULTILINE):
+    content = re.sub(pattern, update_block, content, flags=re.MULTILINE)
+else:
+    sep = '' if content.endswith('\n\n') else '\n' if content.endswith('\n') else '\n\n'
+    content += sep + f'Host {name}\n    HostName {ip}\n'
+
+open(config_path, 'w').write(content)
+PYEOF
+
 # Fresh server always has a new host key; drop any stale entry to avoid known_hosts conflict
 ssh-keygen -R "$ip" 2>/dev/null || true
 
