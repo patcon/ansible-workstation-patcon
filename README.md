@@ -2,6 +2,19 @@
 
 Provisions a Hetzner VPS workstation via Ansible.
 
+## Termux Shortcuts
+
+The `support/termux/shortcuts/` directory contains scripts for [Termux:Widget](https://f-droid.org/packages/com.termux.widget/) shortcuts. Symlink it as `~/.shortcuts` to make them available:
+
+```sh
+ln -s ~/repos/ansible-workstation-patcon/support/termux/shortcuts ~/.shortcuts
+```
+
+Available shortcuts:
+
+- **hcloud-workstation-up** — create a new workstation server (auto-named)
+- **hcloud-workstation-list** — list all servers
+
 ## Bootstrap from Termux
 
 1. Install [Termux](https://f-droid.org/packages/com.termux/) from F-Droid
