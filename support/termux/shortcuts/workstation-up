@@ -16,6 +16,9 @@ name=$(cd "$REPO" && scripts/hcloud-workstation up | tee /dev/tty | tail -1)
 ip=$(hcloud server describe "$name" -o json \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['public_net']['ipv4']['ip'])")
 
+# Fresh server always has a new host key; drop any stale entry to avoid known_hosts conflict
+ssh-keygen -R "$ip" 2>/dev/null || true
+
 # Phase 1: root SSH — install Ansible, run bootstrap (creates patcon user, hardens SSH)
 echo "Waiting for SSH on $ip..."
 until ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no root@"$ip" true 2>/dev/null; do
