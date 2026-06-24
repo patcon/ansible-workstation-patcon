@@ -96,6 +96,18 @@
           source ~/.homesick/repos/homeshick/homeshick.sh
           homeshick "$@"
 
+    - name: Initialize dotfiles-pub git submodules recursively
+      command: git submodule update --init --recursive
+      args:
+        chdir: "{{ personalization_repos_dir }}/dotfiles-pub"
+      changed_when: false
+
+    - name: Pre-create editorconfig-core-py directory for homeshick
+      file:
+        path: "/home/{{ workstation_user }}/.janus/editorconfig/plugin/editorconfig-core-py/editorconfig"
+        state: directory
+        mode: '0755'
+
     - name: Link dotfiles via homeshick
       shell: |
         source /home/{{ workstation_user }}/.homesick/repos/homeshick/homeshick.sh
