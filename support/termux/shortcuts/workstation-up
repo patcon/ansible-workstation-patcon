@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -euo pipefail
+trap 'read -rp "Press any key to exit..." -n1' EXIT
 
 # Termux Widget runs in a real terminal; bail early in non-interactive contexts
 if ! test -w /dev/tty; then
