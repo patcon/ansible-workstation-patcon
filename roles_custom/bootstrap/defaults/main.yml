@@ -3,3 +3,4 @@ bootstrap_user: patcon
 bootstrap_user_ssh_keys:
   - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPrFDl8IIrY9ODQFIu+QfIgdnyCqR3Og3hvTeP69ZfMF patcon@macbook-2017-chris"
   - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGwPJTTEYytVWBqDGnzfeUTc3+MZKJlpxhEqwTw6hqR2 patcon@mobile-pixel-7a"
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFM68OWQHoByudNNqSZ18dg8COc3MZtbeMuogDGKvZ6q patcon@ubuntu-wsl-surface"
