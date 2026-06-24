@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-systemctl --user start clipboard-receiver
-trap 'systemctl --user stop clipboard-receiver' EXIT
+clipboard-receiver &
+CLIPBOARD_PID=$!
+trap "kill $CLIPBOARD_PID 2>/dev/null" EXIT
 
 ssh "$@"
