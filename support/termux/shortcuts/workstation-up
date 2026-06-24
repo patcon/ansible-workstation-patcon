@@ -9,6 +9,9 @@ fi
 
 REPO=~/repos/ansible-workstation-patcon
 
+# Ensure ssh-agent is running with keys loaded (reuses interactive shell agent)
+source "$REPO/support/termux/ssh-agent.bash"
+
 # Create server; show output but capture final line (server name)
 name=$(cd "$REPO" && scripts/hcloud-workstation up | tee /dev/tty | tail -1)
 
