@@ -29,4 +29,4 @@ until ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no patcon@"$ip" true 2>/d
   sleep 5
 done
 ssh -A -o StrictHostKeyChecking=no patcon@"$ip" \
-  'cd /tmp/ansible-workstation-patcon && sudo --preserve-env=SSH_AUTH_SOCK make local_converge'
+  'cd /tmp/ansible-workstation-patcon && make local_converge'
