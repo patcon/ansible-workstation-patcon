@@ -73,3 +73,40 @@
         accept_hostkey: true
         update: false
       loop: "{{ personalization_repos }}"
+
+    - name: Install homeshick
+      git:
+        repo: https://github.com/andsens/homeshick.git
+        dest: "/home/{{ workstation_user }}/.homesick/repos/homeshick"
+        accept_hostkey: true
+        update: false
+
+    - name: Register dotfiles-pub castle with homeshick
+      file:
+        src: "{{ personalization_repos_dir }}/dotfiles-pub"
+        dest: "/home/{{ workstation_user }}/.homesick/repos/dotfiles-pub"
+        state: link
+
+    - name: Install homeshick wrapper script
+      copy:
+        dest: "/home/{{ workstation_user }}/.local/bin/homeshick"
+        mode: '0755'
+        content: |
+          #!/usr/bin/env bash
+          source ~/.homesick/repos/homeshick/homeshick.sh
+          homeshick "$@"
+
+    - name: Link dotfiles via homeshick
+      shell: |
+        source /home/{{ workstation_user }}/.homesick/repos/homeshick/homeshick.sh
+        homeshick link --skip dotfiles-pub
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Install oh-my-zsh
+      shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+      environment:
+        KEEP_ZSHRC: "yes"
+      args:
+        creates: "/home/{{ workstation_user }}/.oh-my-zsh"

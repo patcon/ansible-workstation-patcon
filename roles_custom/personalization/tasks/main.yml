@@ -55,6 +55,13 @@
   become: true
   become_user: root
 
+- name: Install zsh
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+  become: true
+  become_user: root
+
 - name: Install nvm
   shell: curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_version }}/install.sh | bash
   args:
