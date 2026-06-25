@@ -30,7 +30,7 @@ device_termux: ## Install Termux support scripts locally (clipboard, ssh-clipboa
 	bash support/termux/customize-keyboard.sh
 
 device_ubuntu: ## Install ubuntu-desktop support scripts locally (clipboard, ssh-clipboard)
-	bash support/ubuntu-desktop/setup.sh
+	bash support/ubuntu-desktop/setup-clipboard.sh
 
 check: install_roles ## Dry-run the workstation playbook
 	ansible-playbook playbooks/workstation.yml --check --diff
