@@ -8,9 +8,10 @@ usage() {
 Usage: $SCRIPT_NAME <command> [options]
 
 Commands:
-  up [name]     Create a new server (auto-names: workstation-main, then workstation-test1, test2, ...)
+  up [name]          Create a new server (auto-names: workstation-main, then workstation-test1, test2, ...)
   down <name> [-y|--yes]   Delete a server by name
-  list          List all servers
+  list               List all servers
+  ssh-config         Sync ~/.ssh/config.d/hcloud-* with current server IPs
 
 Options:
   -h, --help    Show this help
@@ -109,12 +110,47 @@ cmd_list() {
   hcloud server list
 }
 
+cmd_ssh_config() {
+  local config_dir="$HOME/.ssh/config.d"
+  mkdir -p "$config_dir"
+  chmod 700 "$config_dir"
+
+  local servers_json
+  servers_json=$(hcloud server list -o json)
+
+  SERVERS_JSON="$servers_json" CONFIG_DIR="$config_dir" python3 << 'PYEOF'
+import json, os, glob
+
+config_dir = os.environ["CONFIG_DIR"]
+servers = json.loads(os.environ["SERVERS_JSON"])
+
+written = set()
+for s in servers:
+    name = s["name"]
+    ip = s["public_net"]["ipv4"]["ip"]
+    filename = os.path.join(config_dir, f"hcloud-{name}")
+    with open(filename, "w") as f:
+        f.write(f"Host {name}\n    HostName {ip}\n")
+    os.chmod(filename, 0o600)
+    written.add(f"hcloud-{name}")
+    print(f"  wrote {filename}")
+
+for filepath in glob.glob(os.path.join(config_dir, "hcloud-*")):
+    if os.path.basename(filepath) not in written:
+        os.remove(filepath)
+        print(f"  removed {filepath}")
+
+print(f"SSH config synced: {len(servers)} server(s)")
+PYEOF
+}
+
 require_hcloud
 
 case "${1:-}" in
-  up)    shift; cmd_up "$@" ;;
-  down)  shift; cmd_down "$@" ;;
-  list)  cmd_list ;;
+  up)         shift; cmd_up "$@" ;;
+  down)       shift; cmd_down "$@" ;;
+  list)       cmd_list ;;
+  ssh-config) cmd_ssh_config ;;
   -h|--help|help) usage ;;
   "") usage; exit 1 ;;
   *) die "Unknown command: $1. Run '$SCRIPT_NAME --help' for usage." ;;

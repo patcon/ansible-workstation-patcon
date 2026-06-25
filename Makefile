@@ -26,10 +26,12 @@ local_converge: install_roles ## Converge the workstation locally (usually faste
 	ansible-playbook playbooks/workstation.yml --connection=local
 
 device_termux: ## Install Termux support scripts locally (clipboard, ssh-clipboard)
+	bash support/common/setup-ssh-config-d.sh
 	bash support/termux/setup-clipboard.sh
 	bash support/termux/customize-keyboard.sh
 
 device_ubuntu: ## Install ubuntu-desktop support scripts locally (clipboard, ssh-clipboard)
+	bash support/common/setup-ssh-config-d.sh
 	bash support/ubuntu-desktop/setup-clipboard.sh
 
 check: install_roles ## Dry-run the workstation playbook
