@@ -32,7 +32,10 @@
       tags: hardening
       vars:
         ssh_allow_agent_forwarding: true
-        ssh_allow_tcp_forwarding: 'remote'
+        # TODO: restrict to 'remote' once dev-sec.ssh-hardening template supports it
+        # (template whitelist currently rejects 'remote', silently falling back to 'no')
+        # 'yes' allows local forwarding too, which is a minor security risk
+        ssh_allow_tcp_forwarding: 'yes'
         ssh_server_permit_environment_vars: 'yes'
         ssh_server_accept_env_vars: 'CLAUDE_CODE_OAUTH_TOKEN GITHUB_TOKEN'
     - role: github_cli
