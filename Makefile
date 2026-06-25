@@ -27,6 +27,9 @@ local_converge: install_roles ## Converge the workstation locally (usually faste
 
 device_termux_android: ## Install Termux support scripts locally (clipboard, ssh-clipboard)
 	bash support/termux/setup-clipboard.sh
+	mkdir -p ~/.termux
+	install -m 0644 support/termux/termux.properties ~/.termux/termux.properties
+	termux-reload-settings
 
 device_ubuntu_desktop: ## Install ubuntu-desktop support scripts locally (clipboard, ssh-clipboard)
 	bash support/ubuntu-desktop/setup.sh
