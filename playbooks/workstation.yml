@@ -47,11 +47,12 @@
     - role: geerlingguy.docker
     - role: flatnotes
   post_tasks:
-    - name: Reload sshd to pick up config changes
+    - name: Restart sshd after ssh-hardening
       service:
         name: sshd
-        state: reloaded
+        state: restarted
       become: true
+      tags: hardening
 
 # Repo cloning runs in a separate play as patcon so SSH agent forwarding
 # works natively (become_user doesn't inherit SSH_AUTH_SOCK from root).
