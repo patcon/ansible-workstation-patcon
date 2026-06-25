@@ -5,4 +5,5 @@ clipboard-receiver &
 CLIPBOARD_PID=$!
 trap "kill $CLIPBOARD_PID 2>/dev/null" EXIT
 
-ssh "$@"
+# See: https://gist.github.com/dergachev/8259104
+ssh -R 5556:localhost:5556 "$@"

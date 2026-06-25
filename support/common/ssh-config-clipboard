@@ -1,3 +1,0 @@
-# See: https://gist.github.com/dergachev/8259104
-Host workstation*
-  RemoteForward 5556 localhost:5556
