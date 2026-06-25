@@ -11,7 +11,7 @@
     name: "{{ bootstrap_user }}"
     groups: sudo
     append: true
-    shell: /bin/bash
+    shell: /bin/zsh
     state: present
 
 - name: Allow passwordless sudo for the group
@@ -26,6 +26,7 @@
     name:
       - ansible
       - make
+      - zsh
     state: present
     update_cache: false
 
