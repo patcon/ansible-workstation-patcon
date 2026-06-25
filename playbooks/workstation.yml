@@ -126,3 +126,8 @@
         KEEP_ZSHRC: "yes"
       args:
         creates: "/home/{{ workstation_user }}/.oh-my-zsh"
+
+    - name: Install uv
+      shell: curl -LsSf https://astral.sh/uv/install.sh | sh
+      args:
+        creates: "/home/{{ workstation_user }}/.local/bin/uv"
