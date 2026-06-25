@@ -1,0 +1,17 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -euo pipefail
+trap 'read -rp "Press any key to exit..." -n1' EXIT
+
+if ! test -w /dev/tty; then
+  echo "Error: /dev/tty not available — run this in a real terminal" >&2
+  exit 1
+fi
+
+REPO=~/repos/ansible-workstation-patcon
+
+"$REPO/scripts/hcloud-workstation" list
+
+read -rp "Server name to delete: " name
+[[ -n "$name" ]] || { echo "No name entered. Aborted."; exit 0; }
+
+"$REPO/scripts/hcloud-workstation" down "$name"
