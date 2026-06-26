@@ -1,6 +1,6 @@
-# Shared SSH agent across Termux sessions.
-# Source this from ~/.bashrc:
-#   . ~/repos/ansible-workstation-patcon/support/termux/ssh-agent.bash
+# Shared SSH agent across sessions.
+# Source this from ~/.bashrc or ~/.zshrc:
+#   . ~/repos/ansible-workstation-patcon/support/common/ssh-agent.bash
 #
 # Uses kill -0 instead of ps -ef to check agent liveness, since ps cannot
 # see all processes on Android/Termux.
@@ -24,8 +24,13 @@ function start_agent {
 #      live agent already has keys.
 if [ -f "${SSH_ENV}" ]; then
     . "${SSH_ENV}" > /dev/null
-    kill -0 $SSH_AGENT_PID 2>/dev/null || start_agent
-    ssh-add -l > /dev/null 2>&1 || ssh-add ~/.ssh/id_ed25519
+    if kill -0 $SSH_AGENT_PID 2>/dev/null; then
+        # Case 3: agent alive — add key if missing.
+        ssh-add -l > /dev/null 2>&1 || ssh-add ~/.ssh/id_ed25519
+    else
+        # Case 2: agent dead — restart (start_agent also adds the key).
+        start_agent
+    fi
 else
     start_agent
 fi
